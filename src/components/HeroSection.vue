@@ -11,25 +11,24 @@
 
     <!-- Content -->
     <div class="hero__content">
-      <p class="hero__eyebrow">PRECISION PERFORMANCE</p>
+      <p class="hero__eyebrow">{{ t.hero.eyebrow }}</p>
 
       <h1 class="hero__headline">
-        <span class="hero__headline-white">FORGED IN</span>
-        <span class="hero__headline-lime">MOTION</span>
+        <span class="hero__headline-white">{{ t.hero.headlineTop }}</span>
+        <span class="hero__headline-lime">{{ t.hero.headlineLime }}</span>
       </h1>
 
       <p class="hero__desc">
-        The elite sanctuary for those who demand surgical precision
-        in their training. We don't just build muscle; we curate kinetic excellence.
+        {{ t.hero.desc }}
       </p>
 
       <div class="hero__ctas">
         <a href="#classes" class="btn-lime" id="hero-cta-join">
-          JOIN THE LAB
+          {{ t.hero.ctaJoin }}
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
         <a href="#stats" class="btn-outline" id="hero-cta-stats">
-          EXPLORE STATS
+          {{ t.hero.ctaStats }}
         </a>
       </div>
     </div>
@@ -38,7 +37,7 @@
     <div class="hero__stats-bar">
       <div class="stats-ticker">
         <div class="ticker-track">
-          <span v-for="(s, i) in [...stats, ...stats]" :key="i" class="ticker-item">
+          <span v-for="(s, i) in [...t.stats, ...t.stats]" :key="i" class="ticker-item">
             <strong>{{ s.value }}</strong> {{ s.label }}
             <span class="ticker-dot" aria-hidden="true">·</span>
           </span>
@@ -49,20 +48,14 @@
     <!-- Scroll indicator -->
     <div class="hero__scroll" aria-label="Scroll down">
       <span class="scroll-line"></span>
-      <span class="scroll-label">SCROLL</span>
+      <span class="scroll-label">{{ t.hero.scrollLabel }}</span>
     </div>
   </section>
 </template>
 
 <script setup>
-const stats = [
-  { value: '12K+', label: 'Active Members' },
-  { value: '48', label: 'Elite Coaches' },
-  { value: '200+', label: 'Monthly Classes' },
-  { value: '98%', label: 'Satisfaction Rate' },
-  { value: '24/7', label: 'Access' },
-  { value: '15yr', label: 'Of Excellence' },
-]
+import { useLanguage } from '../composables/useLanguage'
+const { t } = useLanguage()
 </script>
 
 <style scoped>
@@ -124,7 +117,8 @@ const stats = [
   width: 100%;
   margin: 0 auto;
   padding: 0 clamp(24px, 6vw, 80px);
-  padding-top: 72px;
+  padding-top: 80px;
+  padding-bottom: clamp(80px, 10vh, 120px);
   animation: fadeUp 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
 }
 

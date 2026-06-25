@@ -5,16 +5,16 @@
       <div class="classes__header">
         <div class="classes__title-group">
           <h2 class="classes__title">
-            OUR <span class="title-lime">CLASSES</span>
+            {{ t.classes.title }} <span class="title-lime">{{ t.classes.titleLime }}</span>
           </h2>
           <div class="title-underline"></div>
         </div>
         <div class="classes__header-right">
           <p class="classes__header-desc">
-            Curated high-intensity programming designed<br class="br-desktop" /> by elite physiologists.
+            {{ t.classes.desc }}
           </p>
           <a href="#" class="view-all-link" id="classes-view-all">
-            VIEW ALL CLASSES
+            {{ t.classes.viewAll }}
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </a>
         </div>
@@ -23,7 +23,7 @@
       <!-- Cards Grid -->
       <div class="classes__grid">
         <div
-          v-for="(cls, i) in classes"
+          v-for="(cls, i) in t.classes.list"
           :key="cls.id"
           class="class-card"
           :id="`class-card-${cls.id}`"
@@ -31,7 +31,7 @@
         >
           <!-- Image -->
           <div class="class-card__img-wrap">
-            <img :src="cls.image" :alt="cls.name + ' class'" class="class-card__img" loading="lazy" />
+            <img :src="classImages[cls.id]" :alt="cls.name + ' class'" class="class-card__img" loading="lazy" />
             <div class="class-card__img-overlay"></div>
           </div>
 
@@ -56,7 +56,7 @@
           <!-- Hover overlay CTA -->
           <div class="class-card__hover">
             <a :href="`#class-${cls.id}`" class="class-card__book-btn" :id="`book-${cls.id}`">
-              BOOK CLASS
+              {{ t.classes.book }}
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
           </div>
@@ -67,40 +67,17 @@
 </template>
 
 <script setup>
-const classes = [
-  {
-    id: 'yoga',
-    category: 'RECOVERY',
-    name: 'YOGA',
-    image: '/class_yoga.png',
-    time: 'MON/WED — 07:00 AM',
-    trainer: 'ELENA VOLKOV',
-  },
-  {
-    id: 'hiit',
-    category: 'METABOLIC',
-    name: 'HIIT',
-    image: '/class_hiit.png',
-    time: 'TUE/THU — 06:00 PM',
-    trainer: 'MARCUS THORNE',
-  },
-  {
-    id: 'weights',
-    category: 'STRENGTH',
-    name: 'WEIGHT TRAINING',
-    image: '/class_weights.png',
-    time: 'DAILY — 05:00 AM',
-    trainer: 'SARAH CHEN',
-  },
-  {
-    id: 'boxing',
-    category: 'COMBAT',
-    name: 'BOXING',
-    image: '/class_boxing.png',
-    time: 'FRI/SAT — 04:00 PM',
-    trainer: 'JAXON REED',
-  },
-]
+import { useLanguage } from '../composables/useLanguage'
+
+const { t } = useLanguage()
+
+// Map class id to image path (stays the same regardless of language)
+const classImages = {
+  yoga: '/class_yoga.png',
+  hiit: '/class_hiit.png',
+  weights: '/class_weights.png',
+  boxing: '/class_boxing.png',
+}
 </script>
 
 <style scoped>
@@ -127,8 +104,6 @@ const classes = [
   margin-bottom: clamp(40px, 6vw, 72px);
   flex-wrap: wrap;
 }
-
-.classes__title-group {}
 
 .classes__title {
   font-family: 'Barlow Condensed', sans-serif;
@@ -340,7 +315,6 @@ const classes = [
 @media (max-width: 640px) {
   .classes__header { flex-direction: column; align-items: flex-start; }
   .classes__header-right { text-align: left; }
-  .br-desktop { display: none; }
   .classes__grid { grid-template-columns: 1fr; gap: 14px; }
   .class-card { aspect-ratio: 4 / 3; }
   .class-card__content { transform: none !important; }

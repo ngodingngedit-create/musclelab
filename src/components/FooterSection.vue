@@ -3,7 +3,24 @@
     <!-- Top decorative bar -->
     <div class="footer__topbar">
       <div class="topbar__inner">
-        <span class="topbar__tagline">KINETIC PRECISION · ELITE PERFORMANCE · FORGED IN MOTION</span>
+        <div class="topbar__track">
+          <div class="topbar__item">
+            <span class="topbar__tagline">{{ t.footer.topbar }}</span>
+            <span class="topbar__separator" aria-hidden="true">·</span>
+          </div>
+          <div class="topbar__item topbar__item--duplicate" aria-hidden="true">
+            <span class="topbar__tagline">{{ t.footer.topbar }}</span>
+            <span class="topbar__separator">·</span>
+          </div>
+          <div class="topbar__item topbar__item--duplicate" aria-hidden="true">
+            <span class="topbar__tagline">{{ t.footer.topbar }}</span>
+            <span class="topbar__separator">·</span>
+          </div>
+          <div class="topbar__item topbar__item--duplicate" aria-hidden="true">
+            <span class="topbar__tagline">{{ t.footer.topbar }}</span>
+            <span class="topbar__separator">·</span>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -15,8 +32,7 @@
             MUSCLE <span class="logo-lime">LAB</span>
           </a>
           <p class="footer__copy">
-            © 2024 Muscle Lab Gym. Kinetic Precision.<br />
-            All rights reserved. Precision engineering for the human form.
+            {{ t.footer.copy }}
           </p>
           <!-- Social Icons -->
           <div class="footer__socials">
@@ -34,34 +50,34 @@
 
         <!-- Connect -->
         <div class="footer__col">
-          <h4 class="footer__col-title">CONNECT</h4>
+          <h4 class="footer__col-title">{{ t.footer.connect }}</h4>
           <ul class="footer__links">
-            <li><a href="#" class="footer__link" id="footer-instagram-link">Instagram</a></li>
-            <li><a href="#" class="footer__link" id="footer-contact">Contact</a></li>
-            <li><a href="#" class="footer__link" id="footer-newsletter">Newsletter</a></li>
-            <li><a href="#" class="footer__link" id="footer-community">Community</a></li>
+            <li><a href="#" class="footer__link" id="footer-instagram-link">{{ t.footer.links.instagram }}</a></li>
+            <li><a href="#" class="footer__link" id="footer-contact">{{ t.footer.links.contact }}</a></li>
+            <li><a href="#" class="footer__link" id="footer-newsletter">{{ t.footer.links.newsletter }}</a></li>
+            <li><a href="#" class="footer__link" id="footer-community">{{ t.footer.links.community }}</a></li>
           </ul>
         </div>
 
         <!-- Access -->
         <div class="footer__col">
-          <h4 class="footer__col-title">ACCESS</h4>
+          <h4 class="footer__col-title">{{ t.footer.access }}</h4>
           <ul class="footer__links">
-            <li><a href="#" class="footer__link" id="footer-hours">Hours</a></li>
-            <li><a href="#" class="footer__link" id="footer-location">Location</a></li>
-            <li><a href="#" class="footer__link" id="footer-membership">Membership</a></li>
-            <li><a href="#" class="footer__link" id="footer-app">Mobile App</a></li>
+            <li><a href="#" class="footer__link" id="footer-hours">{{ t.footer.links.hours }}</a></li>
+            <li><a href="#" class="footer__link" id="footer-location">{{ t.footer.links.location }}</a></li>
+            <li><a href="#" class="footer__link" id="footer-membership">{{ t.footer.links.membership }}</a></li>
+            <li><a href="#" class="footer__link" id="footer-app">{{ t.footer.links.mobileApp }}</a></li>
           </ul>
         </div>
 
         <!-- Newsletter CTA -->
         <div class="footer__newsletter">
-          <h4 class="footer__col-title">STAY FORGED</h4>
-          <p class="newsletter-desc">Get exclusive training insights and early access to new programs.</p>
+          <h4 class="footer__col-title">{{ t.footer.stayForged }}</h4>
+          <p class="newsletter-desc">{{ t.footer.newsletterDesc }}</p>
           <div class="newsletter-form" id="footer-newsletter-form">
             <input
               type="email"
-              placeholder="YOUR EMAIL"
+              :placeholder="t.footer.emailPlaceholder"
               class="newsletter-input"
               id="newsletter-email"
               aria-label="Email address for newsletter"
@@ -77,10 +93,10 @@
     <!-- Bottom bar -->
     <div class="footer__bottom">
       <div class="footer__bottom-inner">
-        <span>Crafted for the relentless.</span>
+        <span>{{ t.footer.crafted }}</span>
         <div class="footer__bottom-links">
-          <a href="#" class="footer__bottom-link" id="footer-privacy">Privacy Policy</a>
-          <a href="#" class="footer__bottom-link" id="footer-terms">Terms of Use</a>
+          <a href="#" class="footer__bottom-link" id="footer-privacy">{{ t.footer.privacy }}</a>
+          <a href="#" class="footer__bottom-link" id="footer-terms">{{ t.footer.terms }}</a>
         </div>
       </div>
     </div>
@@ -88,7 +104,8 @@
 </template>
 
 <script setup>
-// No logic needed for this component
+import { useLanguage } from '../composables/useLanguage'
+const { t } = useLanguage()
 </script>
 
 <style scoped>
@@ -104,12 +121,34 @@
 .footer__topbar {
   background: #c8f400;
   overflow: hidden;
+  position: relative;
+  width: 100%;
 }
 .topbar__inner {
   display: flex;
   align-items: center;
   justify-content: center;
   height: 36px;
+  width: 100%;
+  overflow: hidden;
+}
+.topbar__track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+}
+.topbar__item {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+.topbar__separator {
+  display: none;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #000;
+  padding: 0 1.5rem;
 }
 .topbar__tagline {
   font-family: 'Barlow Condensed', sans-serif;
@@ -119,6 +158,9 @@
   color: #000;
   text-transform: uppercase;
   white-space: nowrap;
+}
+.topbar__item--duplicate {
+  display: none;
 }
 
 /* Body */
@@ -159,6 +201,7 @@
   line-height: 1.8;
   max-width: 280px;
   margin-bottom: 24px;
+  white-space: pre-line;
 }
 
 .footer__socials {
@@ -310,5 +353,30 @@
   .footer__brand { grid-column: auto; }
   .footer__bottom-inner { flex-direction: column; align-items: flex-start; }
   .topbar__tagline { font-size: 0.6rem; }
+  .topbar__separator { font-size: 0.6rem; }
+}
+
+@media (max-width: 900px) {
+  .topbar__inner {
+    justify-content: flex-start;
+  }
+  .topbar__track {
+    animation: marquee-scroll 25s linear infinite;
+  }
+  .topbar__item--duplicate {
+    display: flex;
+  }
+  .topbar__separator {
+    display: inline-block;
+  }
+}
+
+@keyframes marquee-scroll {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-25%, 0, 0);
+  }
 }
 </style>

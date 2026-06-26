@@ -458,7 +458,6 @@ onUnmounted(() => {
   margin: 28px 0;
 }
 
-.summary-card__benefits {}
 
 .benefits__title {
   font-family: var(--font-display);

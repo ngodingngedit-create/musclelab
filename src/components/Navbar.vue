@@ -29,10 +29,10 @@
       <ul class="navbar__links" id="desktop-nav">
         <li v-for="link in navLinks" :key="link.key">
           <a
-            :href="link.href"
+            :href="link.href || '#'"
             class="navbar__link"
             :class="{ 'navbar__link--active': currentView === 'landing' && activeLink === link.key }"
-            @click.prevent="setActive(link.key, link.href)"
+            @click.prevent="setActive(link.key, link.href, link.view)"
             :id="`nav-${link.key.toLowerCase()}`"
           >
             {{ link.label }}
@@ -146,13 +146,17 @@
           </Transition>
         </div>
 
-        <button class="avatar-btn" id="nav-avatar" aria-label="User Profile" @click="navigateTo('profile')">
-          <span class="avatar-initials">MK</span>
+        <button v-if="isLoggedIn" class="avatar-btn" id="nav-avatar" aria-label="User Profile" @click="goToProfile">
+          <img v-if="user.avatar" :src="user.avatar" alt="Avatar" class="avatar-img" />
+          <span v-else class="avatar-initials">{{ initials }}</span>
+        </button>
+        <button v-else class="join-btn" id="nav-login-btn" @click="navigateTo('login')">
+          {{ currentLang === 'id' ? 'MASUK' : 'LOGIN' }}
         </button>
       </div>
 
       <!-- Mobile Actions (Hamburger & Notifications) -->
-      <div class="navbar__mobile-actions">
+      <div v-if="currentView !== 'login' && currentView !== 'signup'" class="navbar__mobile-actions">
         <!-- Mobile Notifications Bell (shown only on mobile) -->
         <div class="notif-wrapper notif-wrapper--mobile" ref="notifRefMobile">
           <button class="icon-btn" id="nav-notification-mobile" aria-label="Notifications" @click="toggleNotifDropdownMobile">
@@ -213,13 +217,12 @@
         <ul class="mobile-links">
           <li v-for="link in navLinks" :key="link.key">
             <a
-              :href="link.href"
+              :href="link.href || '#'"
               class="mobile-link"
               :class="{ 'mobile-link--active': currentView === 'landing' && activeLink === link.key }"
-              @click.prevent="setActive(link.key, link.href); toggleMobile()"
+              @click.prevent="setActive(link.key, link.href, link.view); toggleMobile()"
               :id="`mobile-nav-${link.key.toLowerCase()}`"
             >
-              <!-- <span class="mobile-link__num">{{ navLinks.indexOf(link) }}</span> -->
               {{ link.label }}
               <svg class="mobile-link__arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
@@ -252,14 +255,20 @@
         </div>
 
         <div class="mobile-drawer__footer">
-          <div class="mobile-user" @click="navigateTo('profile'); toggleMobile()" style="cursor: pointer;">
+          <div v-if="isLoggedIn" class="mobile-user" @click="goToProfile(); toggleMobile()" style="cursor: pointer;">
             <div class="avatar-btn">
-              <span class="avatar-initials">MK</span>
+              <img v-if="user.avatar" :src="user.avatar" alt="Avatar" class="avatar-img" />
+              <span v-else class="avatar-initials">{{ initials }}</span>
             </div>
             <div>
-              <p class="mobile-user__name">Marcus Klein</p>
-              <p class="mobile-user__tag">Elite Member</p>
+              <p class="mobile-user__name">{{ user.name }}</p>
+              <p class="mobile-user__tag">{{ user.tier }}</p>
             </div>
+          </div>
+          <div v-else class="mobile-auth-actions" style="width: 100%; padding: 0 10px;">
+            <button class="mobile-join-btn" @click="navigateTo('login'); toggleMobile()">
+              {{ currentLang === 'id' ? 'MASUK KE LAB' : 'SIGN IN TO LAB' }}
+            </button>
           </div>
         </div>
       </div>
@@ -273,7 +282,7 @@
   </nav>
 
   <!-- Mobile Bottom Navigation Bar (Rendered outside the nav element to guarantee stability during viewport scroll height shifts) -->
-  <div v-if="currentView !== 'transaction'" class="mobile-bottom-nav" :class="{ 'mobile-bottom-nav--hidden': mobileOpen, 'mobile-bottom-nav--sidebar-open': profileSidebarOpen }">
+  <div v-if="currentView !== 'transaction' && currentView !== 'login' && currentView !== 'signup'" class="mobile-bottom-nav" :class="{ 'mobile-bottom-nav--hidden': mobileOpen, 'mobile-bottom-nav--sidebar-open': profileSidebarOpen }">
     <a
       href="#hero"
       class="mobile-bottom-nav__item"
@@ -327,8 +336,23 @@
     <a
       href="#"
       class="mobile-bottom-nav__item"
-      :class="{ 'mobile-bottom-nav__item--active': currentView === 'profile' }"
-      @click.prevent="navigateTo('profile')"
+      :class="{ 'mobile-bottom-nav__item--active': currentView === 'chatbot' }"
+      @click.prevent="navigateTo('chatbot')"
+      id="bottom-nav-chatbot"
+    >
+      <span class="mobile-bottom-nav__icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+      </span>
+      <span class="mobile-bottom-nav__label">{{ t.nav.chatbot }}</span>
+    </a>
+
+    <a
+      href="#"
+      class="mobile-bottom-nav__item"
+      :class="{ 'mobile-bottom-nav__item--active': currentView === 'profile' || currentView === 'login' || currentView === 'signup' }"
+      @click.prevent="goToProfile"
       id="bottom-nav-profile"
     >
       <span class="mobile-bottom-nav__icon">
@@ -346,9 +370,26 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useLanguage } from '../composables/useLanguage'
 import { useNavigation } from '../composables/useNavigation'
+import { useAuth } from '../composables/useAuth'
 
 const { currentLang, t, setLang } = useLanguage()
 const { currentView, navigateTo, profileSidebarOpen } = useNavigation()
+const { isLoggedIn, user } = useAuth()
+
+const initials = computed(() => {
+  if (!user.value || !user.value.name) return 'ML'
+  const parts = user.value.name.trim().split(/\s+/)
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
+  return parts[0].substring(0, 2).toUpperCase()
+})
+
+function goToProfile() {
+  if (isLoggedIn.value) {
+    navigateTo('profile')
+  } else {
+    navigateTo('login')
+  }
+}
 
 const isScrolled = ref(false)
 const mobileOpen = ref(false)
@@ -391,27 +432,28 @@ const navLinks = computed(() => [
   { key: 'MEMBERSHIP', label: t.value.nav.membership, href: '#membership' },
   { key: 'CLASSES', label: t.value.nav.classes, href: '#classes' },
   { key: 'ORDER', label: t.value.nav.order, href: '#order' },
-  { key: 'CHATBOT', label: t.value.nav.chatbot, href: '#chatbot' },
+  { key: 'CHATBOT', label: t.value.nav.chatbot, href: null, view: 'chatbot' },
 ])
 
-function setActive(key, href) {
+function setActive(key, href, view) {
   activeLink.value = key
+  if (view) {
+    navigateTo(view)
+    mobileOpen.value = false
+    return
+  }
   if (currentView.value !== 'landing') {
     currentView.value = 'landing'
     setTimeout(() => {
       if (href && href.startsWith('#')) {
         const el = document.querySelector(href)
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth' })
-        }
+        if (el) { el.scrollIntoView({ behavior: 'smooth' }) }
       }
     }, 50)
   } else {
     if (href && href.startsWith('#')) {
       const el = document.querySelector(href)
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' })
-      }
+      if (el) { el.scrollIntoView({ behavior: 'smooth' }) }
     }
   }
 }
@@ -774,6 +816,46 @@ onUnmounted(() => {
   font-weight: 800;
   letter-spacing: 0.05em;
   color: #c8f400;
+}
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.join-btn {
+  background: var(--color-lime);
+  color: #000;
+  border: none;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.join-btn:hover {
+  background: #d4ff00;
+  transform: translateY(-1px);
+}
+.mobile-join-btn {
+  width: 100%;
+  background: var(--color-lime);
+  color: #000;
+  border: none;
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.2s ease;
+}
+.mobile-join-btn:hover {
+  background: #d4ff00;
 }
 
 /* Hamburger */

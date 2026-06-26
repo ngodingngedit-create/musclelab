@@ -31,6 +31,20 @@
               <span class="link-label" v-if="!sidebarCollapsed">{{ item.label }}</span>
             </button>
           </li>
+          
+          <!-- Logout Action -->
+          <li>
+            <button class="profile-sidebar__link profile-sidebar__link--logout" @click="logout">
+              <span class="link-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+              </span>
+              <span class="link-label" v-if="!sidebarCollapsed">{{ currentLang === 'id' ? 'Keluar' : 'Logout' }}</span>
+            </button>
+          </li>
         </ul>
       </nav>
 
@@ -59,11 +73,12 @@
           <div class="profile-banner-card">
             <div class="profile-banner-card__inner">
               <div class="profile-banner-card__avatar-wrap">
-                <img src="/athlete_avatar.png" alt="Marcus Thorne Portrait" class="profile-banner-card__avatar" />
+                <img v-if="user.avatar" :src="user.avatar" alt="Athlete Portrait" class="profile-banner-card__avatar" />
+                <div v-else class="profile-banner-card__avatar-placeholder">{{ initials }}</div>
               </div>
               <div class="profile-banner-card__info">
                 <span class="profile-banner-card__badge">ACTIVE MEMBER</span>
-                <h2 class="profile-banner-card__name">MARCUS THORNE</h2>
+                <h2 class="profile-banner-card__name">{{ user.name }}</h2>
                 <div class="profile-banner-card__location">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
@@ -72,6 +87,16 @@
                   <span>Muscle Lab Downtown, LA</span>
                 </div>
               </div>
+              
+              <!-- Logout Button directly on profile main section -->
+              <button class="profile-logout-btn" @click="logout" id="profile-main-logout">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                <span>{{ currentLang === 'id' ? 'KELUAR' : 'LOGOUT' }}</span>
+              </button>
             </div>
           </div>
 
@@ -85,8 +110,8 @@
                 </svg>
               </div>
               <div class="status-card__text-wrap">
-                <h4 class="status-card__badge-title">PRO ELITE</h4>
-                <p class="status-card__badge-desc">Renews Dec 12, 2024</p>
+                <h4 class="status-card__badge-title">{{ user.tier }}</h4>
+                <p class="status-card__badge-desc">{{ currentLang === 'id' ? 'Diperbarui 12 Des 2024' : 'Renews Dec 12, 2024' }}</p>
               </div>
             </div>
 
@@ -590,6 +615,17 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useLanguage } from '../composables/useLanguage'
 import { useNavigation } from '../composables/useNavigation'
+import { useAuth } from '../composables/useAuth'
+
+// Authentication session
+const { user, logout } = useAuth()
+
+const initials = computed(() => {
+  if (!user.value || !user.value.name) return 'ML'
+  const parts = user.value.name.trim().split(/\s+/)
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
+  return parts[0].substring(0, 2).toUpperCase()
+})
 
 // Layout/routing hooks
 const { currentLang } = useLanguage()
@@ -992,6 +1028,25 @@ onUnmounted(() => {
   border-top-left-radius: 0 !important;
   border-bottom-left-radius: 0 !important;
 }
+.profile-sidebar__link--logout:hover {
+  color: #ff3333 !important;
+  background: rgba(255, 51, 51, 0.05) !important;
+}
+.profile-banner-card__avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1a2a00, #0f1800);
+  color: #c8f400;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  border: 2px solid #c8f400;
+}
 
 .profile-sidebar--collapsed .profile-sidebar__link {
   justify-content: center;
@@ -1362,6 +1417,31 @@ onUnmounted(() => {
   color: var(--color-lime);
 }
 
+.profile-logout-btn {
+  margin-left: auto;
+  background: rgba(255, 51, 51, 0.1);
+  border: 1px solid rgba(255, 51, 51, 0.2);
+  color: #ff5555;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  z-index: 5;
+}
+.profile-logout-btn:hover {
+  background: #ff3333;
+  border-color: #ff3333;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
 /* Status Card */
 .status-card {
   background-color: var(--color-card);
@@ -1400,7 +1480,6 @@ onUnmounted(() => {
   flex-shrink: 0;
 }
 
-.status-card__text-wrap {}
 
 .status-card__badge-title {
   font-family: var(--font-display);
@@ -1416,7 +1495,6 @@ onUnmounted(() => {
   color: var(--color-gray-500);
 }
 
-.progress-block {}
 
 .progress-block__header {
   display: flex;
@@ -1541,7 +1619,6 @@ onUnmounted(() => {
   margin-bottom: 32px;
 }
 
-.chart-card__title-wrap {}
 
 .chart-card__title {
   font-family: var(--font-display);
@@ -2100,7 +2177,6 @@ onUnmounted(() => {
   margin-bottom: 40px;
 }
 
-.profile-footer__left {}
 
 .profile-footer__logo {
   font-family: var(--font-display);
@@ -2241,6 +2317,15 @@ onUnmounted(() => {
 
   .profile-banner-card__inner {
     gap: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .profile-logout-btn {
+    margin-left: 0;
+    margin-top: 14px;
+    width: 100%;
+    justify-content: center;
   }
 
   .profile-banner-card__avatar-wrap {

@@ -13,10 +13,10 @@
           <p class="classes__header-desc">
             {{ t.classes.desc }}
           </p>
-          <a href="#" class="view-all-link" id="classes-view-all">
+          <button class="view-all-link" id="classes-view-all" @click="navigateTo('classes-catalog')">
             {{ t.classes.viewAll }}
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
+          </button>
         </div>
       </div>
 
@@ -53,12 +53,11 @@
             </div>
           </div>
 
-          <!-- Hover overlay CTA -->
           <div class="class-card__hover">
-            <a :href="`#class-${cls.id}`" class="class-card__book-btn" :id="`book-${cls.id}`">
+            <button class="class-card__book-btn" :id="`book-${cls.id}`" @click="navigateToClassRegister(cls)">
               {{ t.classes.book }}
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </a>
+            </button>
           </div>
         </div>
       </div>
@@ -68,8 +67,10 @@
 
 <script setup>
 import { useLanguage } from '../composables/useLanguage'
+import { useNavigation } from '../composables/useNavigation'
 
 const { t } = useLanguage()
+const { navigateTo, navigateToClassRegister } = useNavigation()
 
 // Map class id to image path (stays the same regardless of language)
 const classImages = {
